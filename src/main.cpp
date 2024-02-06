@@ -4,15 +4,15 @@
 
 using namespace geode::prelude;
 
+bool swappedTextures = false;
+
 class $modify(MenuLayer) {
-	
-	bool swappedTextures = false;
 
 	bool init() {
 		MenuLayer::init();
 
-		if (m_fields->swappedTextures) return true;
-		else m_fields->swappedTextures = true;
+		if (swappedTextures) return true;
+		else swappedTextures = true;
 
 		// swaps all user coin textures with their golden counterparts
 		for (int i = 1; i <= 4; i++) {
