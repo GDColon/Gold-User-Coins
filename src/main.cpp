@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/LoadingLayer.hpp>
 #include <Geode/modify/CCSprite.hpp>
 
 using namespace geode::prelude;
@@ -49,5 +50,12 @@ class $modify(CCSprite) {
 		GameObject* gameObj = typeinfo_cast<GameObject*>(this);
 		if (gameObj && gameObj->m_objectID == 1329) return CCSprite::setColor({255, 255, 255});
 		else return CCSprite::setColor(col);
+	}
+};
+
+class $modify(LoadingLayer) {
+	bool init(bool p0) {
+		swappedTextures = false;
+		return LoadingLayer::init(p0);
 	}
 };
