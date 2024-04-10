@@ -7,18 +7,11 @@ using namespace geode::prelude;
 
 bool swappedTextures = false;
 
-void swapTexture(std::string oldKey, std::string newKey) {
-	auto textureCache = CCSpriteFrameCache::get();
-	auto goldTexture = textureCache->spriteFrameByName(oldKey.c_str());
-	textureCache->removeSpriteFrameByName(newKey.c_str());
-	textureCache->addSpriteFrame(goldTexture, newKey.c_str());
-}
-
 class $modify(MenuLayer) {
-
 	bool init() {
 		if (!MenuLayer::init()) return false;
 
+		// test if already swapped textures
 		if (swappedTextures) return true;
 		else swappedTextures = true;
 
@@ -31,10 +24,16 @@ class $modify(MenuLayer) {
 		
 		return true;
 	} 
+
+	void swapTexture(std::string oldKey, std::string newKey) {
+		auto textureCache = CCSpriteFrameCache::get();
+		auto goldTexture = textureCache->spriteFrameByName(oldKey.c_str());
+		textureCache->removeSpriteFrameByName(newKey.c_str());
+		textureCache->addSpriteFrame(goldTexture, newKey.c_str());
+	}
 };
 
 class $modify(CCSprite) {
-
 	// removes the bronze tint on unverified coins
 	void setColor(cocos2d::ccColor3B const& col) {
 		GameObject* gameObj = typeinfo_cast<GameObject*>(this);
