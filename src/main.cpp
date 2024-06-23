@@ -8,10 +8,10 @@ using namespace geode::prelude;
 bool swappedTextures = false;
 
 class $modify(MenuLayer) {
-
 	bool init() {
-		MenuLayer::init();
+		if (!MenuLayer::init()) return false;
 
+		// test if already swapped textures
 		if (swappedTextures) return true;
 		else swappedTextures = true;
 
@@ -21,17 +21,7 @@ class $modify(MenuLayer) {
 			swapTexture("secretCoin_01" + suffix, "secretCoin_2_01" + suffix);
 			swapTexture("secretCoin_b_01" + suffix, "secretCoin_2_b_01" + suffix);
 		}
-
-		// applies a patch that prevents the game from making the particles in coinEffect.plist silver
-		// it's somewhere in EnhancedGameObject::updateUserCoin
-		// first one makes it so (if (isCoin && objectID != 142) { ... }) never runs, 142 is secret coin ID
-		// second and third changes the coin pickup effect to not be silver for user coins 
-		Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14740a), { 0xEB });
-		Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14afa8), { 0xEB }); // something 0xc8ffff
-		Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14b035), { 0xEB }); // something concat21 0xffff
-
-		// todo: android support. but that requires arm knowledge
-
+		
 		return true;
 	} 
 
@@ -44,12 +34,11 @@ class $modify(MenuLayer) {
 };
 
 class $modify(CCSprite) {
-
 	// removes the bronze tint on unverified coins
 	void setColor(cocos2d::ccColor3B const& col) {
 		GameObject* gameObj = typeinfo_cast<GameObject*>(this);
-		if (gameObj && gameObj->m_objectID == 1329) return CCSprite::setColor({255, 255, 255});
-		else return CCSprite::setColor(col);
+		if (gameObj && gameObj->m_objectID == 1329) CCSprite::setColor({255, 255, 255});
+		else CCSprite::setColor(col);
 	}
 };
 
@@ -59,3 +48,15 @@ class $modify(LoadingLayer) {
 		return LoadingLayer::init(p0);
 	}
 };
+
+$execute {
+	// applies a patch that prevents the game from making the particles in coinEffect.plist silver
+	// it's somewhere in EnhancedGameObject::updateUserCoin
+	// first one makes it so (if (isCoin && objectID != 142) { ... }) never runs, 142 is secret coin ID
+	// second and third changes the coin pickup effect to not be silver for user coins 
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14740a), { 0xEB });
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14afa8), { 0xEB }); // something 0xc8ffff
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14b035), { 0xEB }); // something concat21 0xffff
+	
+	// todo: android support. but that requires arm knowledge
+}
