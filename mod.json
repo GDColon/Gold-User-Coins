@@ -1,7 +1,9 @@
 {
-	"geode": "2.0.0",
-	"gd": "2.204",
-	"version": "v1.0.2",
+	"geode": "3.1.1",
+	"gd": {
+  "win": "2.206" 
+},
+	"version": "v1.0.3",
 	"id": "colon.gold_user_coins",
 	"name": "Gold User Coins",
 	"developer": "Colon",
