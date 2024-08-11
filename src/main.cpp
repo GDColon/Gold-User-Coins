@@ -54,9 +54,9 @@ $execute {
 	// it's somewhere in EnhancedGameObject::updateUserCoin
 	// first one makes it so (if (isCoin && objectID != 142) { ... }) never runs, 142 is secret coin ID
 	// second and third changes the coin pickup effect to not be silver for user coins 
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14740a), { 0xEB });
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14afa8), { 0xEB }); // something 0xc8ffff
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x14b035), { 0xEB }); // something concat21 0xffff
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x19c9e8), { 0x83 });
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x1a14c1), { 0x74 }); // something 0xc8ffff
+	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x1a154d), { 0x74 }); // something concat21 0xffff
 	
 	// todo: android support. but that requires arm knowledge
 }
