@@ -8,5 +8,9 @@
 	"name": "Gold User Coins",
 	"developer": "Colon",
 	"description": "Causes user coins to render as secret coins",
-	"repository": "https://github.com/GDColon/Gold-User-Coins"
+	"repository": "https://github.com/GDColon/Gold-User-Coins",
+	"links": {
+		"source": "https://github.com/GDColon/Gold-User-Coins",
+		"homepage": "https://gdcolon.com"
+	}
 }
