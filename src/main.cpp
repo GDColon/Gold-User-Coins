@@ -2,11 +2,25 @@
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/LoadingLayer.hpp>
 #include <Geode/modify/CCSprite.hpp>
+#include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/EnhancedGameObject.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/EditorUI.hpp>
 
 using namespace geode::prelude;
 
 bool swappedTextures = false;
+const int GOLD_COIN = 142;
+const int USER_COIN = 1329;
+const ccColor3B BRONZE_COLOR = ccColor3B{255, 175, 75};
 
+void removeUITint(CCLayer* layer, std::string name) {
+	auto spr = layer->getChildByID(name);
+	if (spr) static_cast<CCSprite*>(spr)->setColor(ccWHITE);
+}
+
+// swap coin textures
 class $modify(MenuLayer) {
 	bool init() {
 		if (!MenuLayer::init()) return false;
@@ -21,27 +35,20 @@ class $modify(MenuLayer) {
 			swapTexture("secretCoin_01" + suffix, "secretCoin_2_01" + suffix);
 			swapTexture("secretCoin_b_01" + suffix, "secretCoin_2_b_01" + suffix);
 		}
+		if (Mod::get()->getSettingValue<bool>("goldUI")) swapTexture("secretCoinUI_001.png", "secretCoinUI2_001.png");
 		
 		return true;
 	} 
 
-	void swapTexture(std::string oldKey, std::string newKey) {
+	void swapTexture(std::string goldKey, std::string userKey) {
 		auto textureCache = CCSpriteFrameCache::get();
-		auto goldTexture = textureCache->spriteFrameByName(oldKey.c_str());
-		textureCache->removeSpriteFrameByName(newKey.c_str());
-		textureCache->addSpriteFrame(goldTexture, newKey.c_str());
+		auto goldTexture = textureCache->spriteFrameByName(goldKey.c_str());
+		textureCache->removeSpriteFrameByName(userKey.c_str());
+		textureCache->addSpriteFrame(goldTexture, userKey.c_str());
 	}
 };
 
-class $modify(CCSprite) {
-	// removes the bronze tint on unverified coins
-	void setColor(cocos2d::ccColor3B const& col) {
-		GameObject* gameObj = typeinfo_cast<GameObject*>(this);
-		if (gameObj && gameObj->m_objectID == 1329) CCSprite::setColor({255, 255, 255});
-		else CCSprite::setColor(col);
-	}
-};
-
+// unset swapped flag if reloading textures
 class $modify(LoadingLayer) {
 	bool init(bool p0) {
 		swappedTextures = false;
@@ -49,14 +56,93 @@ class $modify(LoadingLayer) {
 	}
 };
 
-$execute {
-	// applies a patch that prevents the game from making the particles in coinEffect.plist silver
-	// it's somewhere in EnhancedGameObject::updateUserCoin
-	// first one makes it so (if (isCoin && objectID != 142) { ... }) never runs, 142 is secret coin ID
-	// second and third changes the coin pickup effect to not be silver for user coins 
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x19c9e8), { 0x83 });
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x1a14c1), { 0x74 }); // something 0xc8ffff
-	Mod::get()->patch(reinterpret_cast<void*>(geode::base::get() + 0x1a154d), { 0x74 }); // something concat21 0xffff
-	
-	// todo: android support. but that requires arm knowledge
-}
+// detect and remove the bronze tint on unverified coins
+class $modify(CCSprite) {
+	void setColor(cocos2d::ccColor3B const& col) {
+		if (col == BRONZE_COLOR && Mod::get()->getSettingValue<bool>("noBronze")) {
+			GameObject* gameObj = typeinfo_cast<GameObject*>(this); // check for user coin
+			if (gameObj && gameObj->m_objectID == USER_COIN) {
+				CCSprite::setColor({255, 255, 255});
+				return;
+			}
+		}
+
+		CCSprite::setColor(col);
+	}
+};
+
+// change end screen
+class $modify(EndLevelLayer) {
+	void customSetup() {
+
+		EndLevelLayer::customSetup();
+		if (!Mod::get()->getSettingValue<bool>("goldUI")) return;
+
+		// todo: change particle colors
+		// unfortunately, i can't just trick the game into thinking they're secret coins
+		// since that changes how it checks for collected coins :(
+		m_coinsVerified = false;  // bronze particles look good enough for now
+
+		removeUITint(m_mainLayer, "coin-1-sprite");
+		removeUITint(m_mainLayer, "coin-2-background");
+		removeUITint(m_mainLayer, "coin-3-sprite");
+		removeUITint(m_mainLayer, "coin-4-background");
+		removeUITint(m_mainLayer, "coin-5-sprite");
+		removeUITint(m_mainLayer, "coin-6-background");
+
+		// coin collect effect
+		for (CCSprite* spr : CCArrayExt<CCSprite*>(m_coinsToAnimate)) {
+			spr->setColor(ccWHITE);
+		}
+	}
+};
+
+// coins in pause menu mod!
+class $modify(PauseLayer) {
+	void customSetup() {
+		PauseLayer::customSetup();
+		if (!Mod::get()->getSettingValue<bool>("goldUI") || !Mod::get()->getSettingValue<bool>("noBronze")) return;
+
+		auto bottomMenu = getChildByID("bottom-button-menu");
+		if (bottomMenu) {
+			for (auto node : CCArrayExt<CCNode*>(bottomMenu->getChildren())) {
+				CCSprite* spr = static_cast<CCSprite*>(node);
+				if (spr->getColor() == BRONZE_COLOR) spr->setColor(ccWHITE);
+			}
+		}
+	}
+};
+
+// pickup effect
+class $modify(GameObject) {
+	void playDestroyObjectAnim(GJBaseGameLayer* b) {
+		if (this->m_objectID == USER_COIN) {
+			this->m_objectType = GameObjectType::SecretCoin;
+			GameObject::playDestroyObjectAnim(b);
+			this->m_objectType = GameObjectType::UserCoin;
+		}
+		else GameObject::playDestroyObjectAnim(b);
+	}
+};
+
+// coin particles
+// this is so hacky but it works fine
+class $modify(EnhancedGameObject) {
+	void updateUserCoin() {
+		if (this->m_objectID == USER_COIN) {
+			this->m_objectID = GOLD_COIN;
+			EnhancedGameObject::updateUserCoin();
+			this->m_objectID = USER_COIN;
+		}
+		else EnhancedGameObject::updateUserCoin();
+	}
+};
+
+// sneaky
+class $modify(EditorUI) {
+	void onCreateObject(int objID) {
+		// 1614 ID is mini coin
+		if ((objID == USER_COIN || objID == 1614) && Mod::get()->getSettingValue<bool>("goldCoinsEditor") && CCKeyboardDispatcher::get()->getAltKeyPressed()) EditorUI::onCreateObject(GOLD_COIN);
+		else EditorUI::onCreateObject(objID);
+	}
+};
