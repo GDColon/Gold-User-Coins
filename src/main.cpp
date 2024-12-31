@@ -78,11 +78,6 @@ class $modify(EndLevelLayer) {
 		EndLevelLayer::customSetup();
 		if (!Mod::get()->getSettingValue<bool>("goldUI")) return;
 
-		// todo: change particle colors
-		// unfortunately, i can't just trick the game into thinking they're secret coins
-		// since that changes how it checks for collected coins :(
-		m_coinsVerified = false;  // bronze particles look good enough for now
-
 		removeUITint(m_mainLayer, "coin-1-sprite");
 		removeUITint(m_mainLayer, "coin-2-background");
 		removeUITint(m_mainLayer, "coin-3-sprite");
@@ -94,6 +89,14 @@ class $modify(EndLevelLayer) {
 		for (CCSprite* spr : CCArrayExt<CCSprite*>(m_coinsToAnimate)) {
 			spr->setColor(ccWHITE);
 		}
+	}
+
+	void coinEnterFinished(CCPoint p) {
+		if (!Mod::get()->getSettingValue<bool>("goldUI")) return;
+		bool notLocal = m_notLocal;
+		m_notLocal = false; // use 'official level' particles
+		EndLevelLayer::coinEnterFinished(p);
+		m_notLocal = notLocal;
 	}
 };
 

@@ -41,5 +41,6 @@
 			"version": ">=1.16.0",
 			"importance": "required"
 		}
-	]
+	],
+	"tags": ["customization"]
 }
