@@ -16,7 +16,7 @@ jobs:
           os: windows-latest
           
         - name: macOS
-         os: macos-latest
+          os: macos-latest
 
         - name: Android32
           os: ubuntu-latest
