@@ -1,3 +1,6 @@
+# 2.0.1
+- Mac support
+
 # 2.0.0
 - No longer done via patching the game, should be easy to update now :D (thank you spaghettdev)
 - Coins in the level complete UI are also gold now

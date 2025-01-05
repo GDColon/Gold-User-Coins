@@ -5,7 +5,7 @@
 		"android": "2.2074",
 		"mac": "2.2074"
 	},
-	"version": "v2.0.0",
+	"version": "v2.0.1",
 	"id": "colon.gold_user_coins",
 	"name": "Gold User Coins",
 	"developer": "Colon",
@@ -15,8 +15,8 @@
 	},
 	"settings": {
 		"goldUI": {
-            "name": "Gold coins on end screen",
-            "description": "If gold coins should also be shown on the level's end screen\n\n<cj>(the particle effect during the animation is still the wrong color, send me some delicious grilled squid and I might get around to fixing it)</c>",
+            "name": "Show gold coins on end screen",
+            "description": "If gold coins should also be shown on the level's end screen",
             "type": "bool",
 			"default": true,
 			"requires-restart": true
@@ -31,7 +31,7 @@
 
 		"goldCoinsEditor": {
             "name": "Sneaky sneaky",
-            "description": "Hold ALT while placing a user coin in the editor to place a real gold one instead (will not save)",
+            "description": "Hold ALT while placing a user or mini coin in the editor to place a real gold one instead (will not save)",
             "type": "bool",
 			"default": false
         }
