@@ -109,8 +109,12 @@ class $modify(PauseLayer) {
 		auto bottomMenu = getChildByID("bottom-button-menu");
 		if (bottomMenu) {
 			for (auto node : CCArrayExt<CCNode*>(bottomMenu->getChildren())) {
-				CCSprite* spr = static_cast<CCSprite*>(node);
-				if (spr->getColor() == BRONZE_COLOR) spr->setColor(ccWHITE);
+				if (CCSprite* spr = typeinfo_cast<CCSprite*>(node)) {
+					if (spr->getColor() == BRONZE_COLOR) spr->setColor(ccWHITE);
+					
+					auto sprChild = node->getChildByType<CCSprite>(0);
+					if (sprChild && sprChild->getColor() == BRONZE_COLOR) sprChild->setColor(ccWHITE);
+				}
 			}
 		}
 	}

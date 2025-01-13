@@ -1,3 +1,6 @@
+# 2.0.2
+- Fixed pause menu issues, including crashes with certain mods
+
 # 2.0.1
 - Mac support
 
