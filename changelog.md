@@ -1,3 +1,6 @@
+# 2.0.3
+- iOS Support
+
 # 2.0.2
 - Fixed pause menu issues, including crashes with certain mods
 
