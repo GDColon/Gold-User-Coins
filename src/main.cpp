@@ -35,8 +35,17 @@ class $modify(MenuLayer) {
 			swapTexture("secretCoin_01" + suffix, "secretCoin_2_01" + suffix);
 			swapTexture("secretCoin_b_01" + suffix, "secretCoin_2_b_01" + suffix);
 		}
-		if (Mod::get()->getSettingValue<bool>("goldUI")) swapTexture("secretCoinUI_001.png", "secretCoinUI2_001.png");
+
+		if (Mod::get()->getSettingValue<bool>("showOnEnd")) {
+			swapTexture("secretCoinUI_001.png", "secretCoinUI2_001.png");
+		}
 		
+		if (Mod::get()->getSettingValue<bool>("showOnPause")) {
+			swapTexture("gjCoinUI_01_collected_001.png", "gjCoinUI_02_collected_001.png");
+			swapTexture("gjCoinUI_01_off_001.png", "gjCoinUI_02_off_001.png");
+			swapTexture("gjCoinUI_01_on_001.png", "gjCoinUI_02_on_001.png");
+		}
+
 		return true;
 	} 
 
@@ -76,7 +85,7 @@ class $modify(EndLevelLayer) {
 	void customSetup() {
 
 		EndLevelLayer::customSetup();
-		if (!Mod::get()->getSettingValue<bool>("goldUI")) return;
+		if (!Mod::get()->getSettingValue<bool>("showOnEnd") || !Mod::get()->getSettingValue<bool>("noBronze")) return;
 
 		removeUITint(m_mainLayer, "coin-1-sprite");
 		removeUITint(m_mainLayer, "coin-2-background");
@@ -92,7 +101,7 @@ class $modify(EndLevelLayer) {
 	}
 
 	void coinEnterFinished(CCPoint p) {
-		if (!Mod::get()->getSettingValue<bool>("goldUI")) return;
+		if (!Mod::get()->getSettingValue<bool>("showOnEnd")) return;
 		bool notLocal = m_notLocal;
 		m_notLocal = false; // use 'official level' particles
 		EndLevelLayer::coinEnterFinished(p);
@@ -100,21 +109,25 @@ class $modify(EndLevelLayer) {
 	}
 };
 
-// coins in pause menu mod!
+// change pause menu
+// all this does is remove the bronze tint
 class $modify(PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
-		if (!Mod::get()->getSettingValue<bool>("goldUI") || !Mod::get()->getSettingValue<bool>("noBronze")) return;
+		log::info("on pause menu");
 
-		auto bottomMenu = getChildByID("bottom-button-menu");
-		if (bottomMenu) {
-			for (auto node : CCArrayExt<CCNode*>(bottomMenu->getChildren())) {
-				if (CCSprite* spr = typeinfo_cast<CCSprite*>(node)) {
-					if (spr->getColor() == BRONZE_COLOR) spr->setColor(ccWHITE);
-					
-					auto sprChild = node->getChildByType<CCSprite>(0);
-					if (sprChild && sprChild->getColor() == BRONZE_COLOR) sprChild->setColor(ccWHITE);
-				}
+		if (!Mod::get()->getSettingValue<bool>("showOnPause") || !Mod::get()->getSettingValue<bool>("noBronze")) return;
+
+		auto bottomMenu = m_mainLayer->getChildByID("bottom-button-menu");
+		if (!bottomMenu) return;
+
+		auto coinMenu = bottomMenu->getChildByID("coin-container");
+		if (!coinMenu) return;
+				log::info("found coin menu");
+
+		for (auto node : CCArrayExt<CCNode*>(coinMenu->getChildren())) {
+			if (CCSprite* spr = typeinfo_cast<CCSprite*>(node)) {
+				spr->setColor(ccWHITE);
 			}
 		}
 	}
@@ -147,9 +160,9 @@ class $modify(EnhancedGameObject) {
 
 // sneaky
 class $modify(EditorUI) {
-	void onCreateObject(int objID) {
+	GameObject* onCreateObject(int objID) {
 		// 1614 ID is mini coin
-		if ((objID == USER_COIN || objID == 1614) && Mod::get()->getSettingValue<bool>("goldCoinsEditor") && CCKeyboardDispatcher::get()->getAltKeyPressed()) EditorUI::onCreateObject(GOLD_COIN);
-		else EditorUI::onCreateObject(objID);
+		if ((objID == USER_COIN || objID == 1614) && Mod::get()->getSettingValue<bool>("goldCoinsEditor") && CCKeyboardDispatcher::get()->getAltKeyPressed()) return EditorUI::onCreateObject(GOLD_COIN);
+		else return EditorUI::onCreateObject(objID);
 	}
 };

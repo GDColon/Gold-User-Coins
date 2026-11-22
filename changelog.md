@@ -1,3 +1,7 @@
+# 2.1.0
+- 2.209 support, including new pause menu
+- Added option to disable functioning on pause menu
+
 # 2.0.4
 - 2.208 support
 

@@ -1,12 +1,12 @@
 {
-	"geode": "5.0.0",
+	"geode": "6.0.0-beta.1",
 	"gd": {
-		"win": "2.2081",
-		"android": "2.2081",
-		"mac": "2.2081",
-		"ios": "2.2081"
+		"win": "2.2091",
+		"android": "2.2091",
+		"mac": "2.2091",
+		"ios": "2.2091"
 	},
-	"version": "v2.0.4",
+	"version": "v2.1.0",
 	"id": "colon.gold_user_coins",
 	"name": "Gold User Coins",
 	"developer": "Colon",
@@ -15,14 +15,22 @@
 		"source": "https://github.com/GDColon/Gold-User-Coins"
 	},
 	"settings": {
-		"goldUI": {
-            "name": "Show gold coins on end screen",
+		"showOnEnd": {
+            "name": "Show on end screen",
             "description": "If gold coins should also be shown on the level's end screen",
             "type": "bool",
 			"default": true,
 			"requires-restart": true
         },
 		
+		"showOnPause": {
+            "name": "Show on pause menu",
+            "description": "If gold coins should also be shown on the pause menu",
+            "type": "bool",
+			"default": true,
+			"requires-restart": true
+        },
+
 		"noBronze": {
             "name": "Remove bronze coin tint",
             "description": "Removes the bronze coloring for unverified user coins",
@@ -38,7 +46,7 @@
         }
 	},
     "dependencies": {
-		"geode.node-ids": ">=1.23.0"
+		"geode.node-ids": ">=1.24.0-beta.1"
 	},
 	"tags": ["customization"]
 }
